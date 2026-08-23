@@ -136,7 +136,7 @@ class MarkownAnywhereSettingTab extends PluginSettingTab {
 		display(): void {
 		const { containerEl } = this;
 		containerEl.empty();
-		containerEl.createEl("h2", { text: "Markown Anywhere" });
+		new Setting(containerEl).setName("Markown Anywhere").setHeading();
 		let mirrorFolder = this.plugin.globalConfig.mirrorFolder;
 		let cleanupDays = this.plugin.globalConfig.cleanupDays;
 
