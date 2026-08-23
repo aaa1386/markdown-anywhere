@@ -1,7 +1,7 @@
 {
   "id": "markown-anywhere",
   "name": "Markown Anywhere",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "minAppVersion": "1.5.0",
   "description": "Open Markdown files from anywhere in your vault.",
   "author": "CKeyZhang",
