@@ -47,9 +47,9 @@ jobs:
         shell: pwsh
         run: |
           $version = $env:RELEASE_VERSION
-          $manifest = Get-Content .\plugin\manifest.json -Raw | ConvertFrom-Json
+          $manifest = Get-Content .\manifest.json -Raw | ConvertFrom-Json
           if ($manifest.version -ne $version) {
-            throw "plugin/manifest.json version '$($manifest.version)' does not match release tag '$version'"
+            throw "manifest.json version '$($manifest.version)' does not match release tag '$version'"
           }
 
           $releaseDir = Join-Path $env:GITHUB_WORKSPACE 'release'
@@ -57,8 +57,8 @@ jobs:
           New-Item -ItemType Directory -Force -Path $bundleDir | Out-Null
 
           Copy-Item .\plugin\main.js $bundleDir
-          Copy-Item .\plugin\manifest.json $bundleDir
-          Copy-Item .\plugin\versions.json $bundleDir
+          Copy-Item .\manifest.json $bundleDir
+          Copy-Item .\versions.json $bundleDir
           Copy-Item .\companion\dist\MarkownAnywhere.exe $bundleDir
 
           Copy-Item (Join-Path $bundleDir 'main.js') $releaseDir

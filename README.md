@@ -52,7 +52,7 @@ BRAT installs `main.js` and `manifest.json` from GitHub Release assets. The Wind
 
 ## Releases
 
-Update `plugin/manifest.json` and `plugin/versions.json`, commit the change, then push a semantic-version tag such as `0.1.0` or `0.1.1-beta.1`:
+Update the root `manifest.json` and `versions.json` (and keep the copies in `plugin/` synchronized for local installation), commit the change, then push a semantic-version tag such as `0.1.0` or `0.1.1-beta.1`:
 
 ```powershell
 git tag 0.1.0
