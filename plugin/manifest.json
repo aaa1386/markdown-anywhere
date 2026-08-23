@@ -1,9 +1,9 @@
 {
   "id": "markown-anywhere",
   "name": "Markown Anywhere",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "minAppVersion": "1.5.0",
-  "description": "Open Markdown files from anywhere with Obsidian.",
+  "description": "Open Markdown files from anywhere in your vault.",
   "author": "CKeyZhang",
   "isDesktopOnly": true
 }
