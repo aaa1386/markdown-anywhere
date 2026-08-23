@@ -1,0 +1,5 @@
+dist/
+*.exe
+node_modules/
+plugin/main.js
+plugin/main.js.map

@@ -1,0 +1,92 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish release
+    runs-on: windows-latest
+    env:
+      RELEASE_VERSION: ${{ github.ref_name }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: companion/go.mod
+          cache: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: plugin/package-lock.json
+
+      - name: Install plugin dependencies
+        working-directory: plugin
+        run: npm ci
+
+      - name: Build plugin
+        working-directory: plugin
+        run: npm run build
+
+      - name: Build Windows Companion
+        working-directory: companion
+        run: go build -buildvcs=false -ldflags="-H=windowsgui" -o .\dist\MarkownAnywhere.exe .\cmd\markown-anywhere
+
+      - name: Prepare release assets
+        shell: pwsh
+        run: |
+          $version = $env:RELEASE_VERSION
+          $manifest = Get-Content .\plugin\manifest.json -Raw | ConvertFrom-Json
+          if ($manifest.version -ne $version) {
+            throw "plugin/manifest.json version '$($manifest.version)' does not match release tag '$version'"
+          }
+
+          $releaseDir = Join-Path $env:GITHUB_WORKSPACE 'release'
+          $bundleDir = Join-Path $releaseDir 'MarkownAnywhere'
+          New-Item -ItemType Directory -Force -Path $bundleDir | Out-Null
+
+          Copy-Item .\plugin\main.js $bundleDir
+          Copy-Item .\plugin\manifest.json $bundleDir
+          Copy-Item .\plugin\versions.json $bundleDir
+          Copy-Item .\companion\dist\MarkownAnywhere.exe $bundleDir
+
+          Copy-Item (Join-Path $bundleDir 'main.js') $releaseDir
+          Copy-Item (Join-Path $bundleDir 'manifest.json') $releaseDir
+          Copy-Item (Join-Path $bundleDir 'versions.json') $releaseDir
+          Copy-Item (Join-Path $bundleDir 'MarkownAnywhere.exe') (Join-Path $releaseDir 'MarkownAnywhere-Windows-x64.exe')
+
+          $zipPath = Join-Path $releaseDir "MarkownAnywhere-$version-windows-x64.zip"
+          Compress-Archive -Path (Join-Path $bundleDir '*') -DestinationPath $zipPath -CompressionLevel Optimal
+
+      - name: Publish GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $version = $env:RELEASE_VERSION
+          $assets = @(
+            'release\main.js',
+            'release\manifest.json',
+            'release\versions.json',
+            'release\MarkownAnywhere-Windows-x64.exe',
+            "release\MarkownAnywhere-$version-windows-x64.zip"
+          )
+          $arguments = @('release', 'create', $version) + $assets + @('--title', $version, '--generate-notes')
+          if ($version.Contains('-')) {
+            $arguments += '--prerelease'
+          }
+          & gh @arguments
+          if ($LASTEXITCODE -ne 0) {
+            exit $LASTEXITCODE
+          }
