@@ -16,13 +16,17 @@ func BuildOpenURI(vaultName, vaultRoot, targetPath string) (string, error) {
 	if strings.TrimSpace(vaultName) == "" {
 		return "", ErrEmptyVaultName
 	}
+
 	relative, err := pathutil.RelativeTo(vaultRoot, targetPath)
 	if err != nil {
 		return "", fmt.Errorf("make Obsidian file path: %w", err)
 	}
 
-	query := url.Values{}
-	query.Set("vault", vaultName)
-	query.Set("file", relative)
-	return "obsidian://open?" + query.Encode(), nil
+	// Obsidian 1.13.7 has trouble resolving a Persian Vault name when
+	// it is percent-encoded by url.Values.Encode() and spaces become '+'.
+	// Keep the Vault name in its original Unicode form, while still
+	// URL-encoding the file path.
+	fileValue := url.QueryEscape(relative)
+
+	return "obsidian://open?vault=" + vaultName + "&file=" + fileValue, nil
 }
