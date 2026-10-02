@@ -81,7 +81,7 @@ func TestExternalLinkIsAddressableFromObsidian(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(uri, "file=_external-open%2F") {
+	if !strings.Contains(uri, "file=_external-open/") {
 		t.Fatalf("expected Vault-relative mirror path in URI, got %s", uri)
 	}
 }
