@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/zhangcongke/markdown-anywhere/companion/internal/pathutil"
+	
 )
 
 var ErrEmptyVaultName = errors.New("Vault name must not be empty")
