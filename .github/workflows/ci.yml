@@ -7,17 +7,20 @@ on:
   pull_request:
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
   companion:
-    name: Companion tests
+    name: Companion tests and Windows build
     runs-on: windows-latest
+
     defaults:
       run:
         working-directory: companion
+
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -34,12 +37,25 @@ jobs:
       - name: Run Go vet
         run: go vet ./...
 
+      - name: Build Windows EXE
+        run: |
+          New-Item -ItemType Directory -Force dist
+          go build -buildvcs=false -ldflags="-H=windowsgui" -o dist/MarkownAnywhere-VaultPath.exe ./cmd/markown-anywhere
+
+      - name: Upload Windows EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: MarkownAnywhere-VaultPath
+          path: companion/dist/MarkownAnywhere-VaultPath.exe
+
   plugin:
     name: Plugin build
     runs-on: ubuntu-latest
+
     defaults:
       run:
         working-directory: plugin
+
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
