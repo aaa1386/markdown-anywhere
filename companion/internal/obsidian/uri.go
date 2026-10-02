@@ -3,7 +3,6 @@ package obsidian
 import (
 	"errors"
 	"fmt"
-	"net/url"
 	"strings"
 
 	"github.com/zhangcongke/markdown-anywhere/companion/internal/pathutil"
@@ -22,11 +21,9 @@ func BuildOpenURI(vaultName, vaultRoot, targetPath string) (string, error) {
 		return "", fmt.Errorf("make Obsidian file path: %w", err)
 	}
 
-	// Obsidian 1.13.7 has trouble resolving a Persian Vault name when
-	// it is percent-encoded by url.Values.Encode() and spaces become '+'.
-	// Keep the Vault name in its original Unicode form, while still
-	// URL-encoding the file path.
-	fileValue := strings.ReplaceAll(url.QueryEscape(relative), "+", "%20")
+	// Keep Unicode characters and '/' unchanged.
+	// Encode spaces as %20 instead of '+'.
+	fileValue := strings.ReplaceAll(relative, " ", "%20")
 
 	return "obsidian://open?vault=" + vaultName + "&file=" + fileValue, nil
 }
