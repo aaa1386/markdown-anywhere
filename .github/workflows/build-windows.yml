@@ -1,0 +1,49 @@
+name: Build MarkownAnywhere
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "companion/**"
+      - ".github/workflows/build-windows.yml"
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        working-directory: companion
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+
+      - name: Show Go version
+        run: go version
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Test
+        run: go test ./...
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Build Windows EXE
+        run: |
+          New-Item -ItemType Directory -Force dist
+          go build -buildvcs=false -ldflags="-H=windowsgui" -o dist/MarkownAnywhere-VaultPath.exe ./cmd/markown-anywhere
+
+      - name: Upload EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: MarkownAnywhere-VaultPath
+          path: companion/dist/MarkownAnywhere-VaultPath.exe
