@@ -26,7 +26,7 @@ func BuildOpenURI(vaultName, vaultRoot, targetPath string) (string, error) {
 	// it is percent-encoded by url.Values.Encode() and spaces become '+'.
 	// Keep the Vault name in its original Unicode form, while still
 	// URL-encoding the file path.
-	fileValue := url.QueryEscape(relative)
+	fileValue := strings.ReplaceAll(url.QueryEscape(relative), "+", "%20")
 
 	return "obsidian://open?vault=" + vaultName + "&file=" + fileValue, nil
 }
